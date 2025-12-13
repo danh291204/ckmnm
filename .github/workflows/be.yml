@@ -1,0 +1,37 @@
+name: 🚀 Deploy Backend (PHP) - FreeHostingNoAds
+
+on:
+  push:
+    branches:
+      - main
+    # Chỉ chạy khi có thay đổi trong thư mục 'backend/'
+    paths:
+      - 'backend/**' 
+
+jobs:
+  deploy_backend:
+    runs-on: ubuntu-latest
+    environment: production_backend
+
+    steps:
+    - name: ⬇️ Checkout Mã Nguồn
+      uses: actions/checkout@v4
+      
+    - name: 📂 Triển khai qua FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+      with:
+        server: ${{ secrets.BE_HOST }}
+        username: ${{ secrets.BE_USERNAME }}
+        password: ${{ secrets.BE_PASSWORD }}
+        
+        # Đẩy thư mục cục bộ 'backend'
+        local-dir: './backend/'
+        
+        # Đường dẫn đích trên host (Đã được cập nhật)
+        server-dir: ${{ secrets.BE_TARGET_DIR }}
+        
+        protocol: ftp 
+        port: 21 
+
+    - name: ✅ Triển khai Backend hoàn tất
+      run: echo "Backend deployed to FreeHostingNoAds successfully!"
