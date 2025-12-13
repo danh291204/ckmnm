@@ -1,4 +1,4 @@
-name: 🚀 Deploy Backend (PHP) qua SFTP
+name: 🚀 Deploy Backend (PHP) - FreeHostingNoAds
 
 on:
   push:
@@ -17,22 +17,21 @@ jobs:
     - name: ⬇️ Checkout Mã Nguồn
       uses: actions/checkout@v4
       
-    - name: 📂 Triển khai qua SFTP
+    - name: 📂 Triển khai qua FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.0
       with:
-        # Lấy thông tin từ GitHub Secrets đã thiết lập
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
+        server: ${{ secrets.BE_HOST }}
+        username: ${{ secrets.BE_USERNAME }}
+        password: ${{ secrets.BE_PASSWORD }}
         
-        # Thư mục cục bộ cần đẩy đi (CHỈ ĐẨY thư mục backend)
+        # Đẩy thư mục cục bộ 'backend'
         local-dir: './backend/'
         
-        # Thư mục đích trên host (Đường dẫn tuyệt đối đã xác định)
-        server-dir: ${{ secrets.FTP_TARGET_DIR }}
+        # Đường dẫn đích trên host (Đã được cập nhật)
+        server-dir: ${{ secrets.BE_TARGET_DIR }}
         
-        protocol: sftp 
-        port: 22 
+        protocol: ftp 
+        port: 21 
 
     - name: ✅ Triển khai Backend hoàn tất
-      run: echo "Backend files deployed to Shared Host successfully!"
+      run: echo "Backend deployed to FreeHostingNoAds successfully!"
