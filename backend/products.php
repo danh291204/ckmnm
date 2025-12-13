@@ -4,7 +4,7 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
 session_start();
 require 'condb.php';
-
+//Test deploy
 // Khởi tạo giỏ hàng
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
@@ -84,7 +84,7 @@ $cart_total_price = array_sum(array_map(function($item) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cửa Hàng Điện Thoại</title>
+    <title>Cửa Hàng Điện Thoại vui</title>
     <style>
         * {
             margin: 0;
