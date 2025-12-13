@@ -84,7 +84,7 @@ $cart_total_price = array_sum(array_map(function($item) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cửa Hàng Điện Thoại vui</title>
+    <title>Cửa Hàng Điện Thoại vui vui</title>
     <style>
         * {
             margin: 0;
