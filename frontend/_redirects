@@ -1,0 +1,5 @@
+# 1. API Sản phẩm: Chuyển hướng /api/products đến Backend HTTP
+/api/products    http://ckmnm2.atwebpages.com/backend/product_api.php    200
+
+# 2. API Giỏ hàng: Chuyển hướng /api/cart đến Backend HTTP
+/api/cart        http://ckmnm2.atwebpages.com/backend/cart_api.php    200

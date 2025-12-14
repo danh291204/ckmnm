@@ -711,9 +711,9 @@
         // *** CẤU HÌNH API ***
         // Đường dẫn tới API lấy sản phẩm
         // Vui lòng điều chỉnh đường dẫn này (ví dụ: 'http://yourdomain.com/backend/get_products_api.php')
-        const PRODUCTS_API_URL = 'http://ckmnm.atwebpages.com/backend/product_api.php'; 
+        const PRODUCTS_API_URL = '/api/products'; 
         // Đường dẫn tới API thêm sản phẩm vào giỏ (nếu dùng PHP Session)
-        const CART_API_URL = 'http://ckmnm.atwebpages.com/backend/cart_api.php';
+        const CART_API_URL = '/api/cart';
 
         let cart = JSON.parse(localStorage.getItem('cart')) || {};
         
