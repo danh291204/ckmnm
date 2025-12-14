@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -497,4 +497,383 @@
         });
     </script>
 </body>
+</html> -->
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ Hàng Của Bạn</title>
+    <style>
+        /* CSS tương tự như file viewcart.php trước đó (đã lược bỏ để ngắn gọn) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: white;
+            color: #2c3e50;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .cart-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .cart-table th,
+        .cart-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .cart-table th {
+            background-color: #f4f7f6;
+            font-weight: bold;
+            color: #34495e;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .product-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .quantity-input {
+            width: 50px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+
+        .price,
+        .subtotal {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .cart-summary {
+            text-align: right;
+            margin-top: 20px;
+            border-top: 2px solid #bdc3c7;
+            padding-top: 20px;
+        }
+
+        .cart-summary p {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        .grand-total {
+            font-size: 24px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .cart-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-checkout {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .btn-back:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-checkout:hover {
+            opacity: 0.9;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        .empty-cart-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .nav-link {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 16px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        #cartLoading {
+            text-align: center;
+            padding: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🛒 Giỏ Hàng Của Tôi</h1>
+            <a href="products.html" class="nav-link">← Tiếp Tục Mua Sắm</a>
+        </header>
+
+        <div class="cart-content">
+            <div id="cartLoading">Đang tải giỏ hàng...</div>
+
+            <div id="cartDisplay">
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // *** CẤU HÌNH API ***
+        const CART_API_URL = '../backend/cart_api.php';
+
+        // ===================================================================
+        // HÀM TIỆN ÍCH
+        // ===================================================================
+
+        function formatPrice(price) {
+            const numericPrice = parseFloat(price);
+            if (isNaN(numericPrice)) return 'N/A';
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(numericPrice);
+        }
+
+        // ===================================================================
+        // HÀM RENDER GIỎ HÀNG BẰNG JS
+        // ===================================================================
+
+        function renderCart(cartData) {
+            const cartDisplay = document.getElementById('cartDisplay');
+            let html = '';
+
+            if (cartData.total_items === 0 || cartData.cart_items.length === 0) {
+                // Hiển thị khi giỏ hàng trống
+                html = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛍️</div>
+                        <h2>Giỏ hàng của bạn đang trống!</h2>
+                        <p>Hãy thêm các sản phẩm tuyệt vời vào giỏ ngay.</p>
+                    </div>
+                `;
+            } else {
+                // Tạo bảng giỏ hàng
+                let tableRows = cartData.cart_items.map(item => {
+                    const subtotal = item.price * item.quantity;
+                    return `
+                        <tr>
+                            <td class="product-name">${item.name}</td>
+                            <td class="price">${formatPrice(item.price)}</td>
+                            <td>
+                                <input type="number" class="quantity-input" value="${item.quantity}" min="1" data-product-id="${item.id}" onchange="updateQuantity(${item.id}, this.value)">
+                            </td>
+                            <td class="subtotal">${formatPrice(subtotal)}</td>
+                            <td>
+                                <button class="btn btn-remove" style="background-color: #e74c3c; color: white; padding: 5px 10px;" onclick="removeItem(${item.id})">Xóa</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                html = `
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Sản Phẩm</th>
+                                <th>Giá</th>
+                                <th>Số Lượng</th>
+                                <th>Thành Tiền</th>
+                                <th>Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+
+                    <div class="cart-summary">
+                        <p>Tạm Tính: <span>${formatPrice(cartData.grand_total)}</span></p>
+                        <p class="grand-total">Tổng Cộng: <span>${formatPrice(cartData.grand_total)}</span></p>
+                    </div>
+
+                    <div class="cart-actions">
+                        <a href="products.html" class="btn btn-back">← Tiếp Tục Mua Sắm</a>
+                        <button class="btn btn-checkout">Tiến Hành Thanh Toán →</button>
+                    </div>
+                `;
+            }
+
+            cartDisplay.innerHTML = html;
+        }
+
+        // ===================================================================
+        // HÀM FETCH DỮ LIỆU GIỎ HÀNG TỪ SERVER
+        // ===================================================================
+
+        function fetchCart() {
+            document.getElementById('cartLoading').style.display = 'block';
+
+            // Gọi API với action=view
+            fetch(`${CART_API_URL}?action=view`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Lỗi mạng khi tải giỏ hàng.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('cartLoading').style.display = 'none';
+                    if (data.status === 'success') {
+                        renderCart(data);
+                    } else {
+                        throw new Error(data.message || 'Lỗi dữ liệu giỏ hàng.');
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('cartLoading').style.display = 'none';
+                    document.getElementById('cartDisplay').innerHTML = `
+                        <div class="empty-cart">
+                            <div class="empty-cart-icon">❌</div>
+                            <p>Không thể tải giỏ hàng: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // ===================================================================
+        // CÁC HÀNH ĐỘNG JS (Cần API cập nhật trong cart_api.php)
+        // ===================================================================
+
+        function removeItem(productId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('product_id', productId);
+
+            fetch(`${CART_API_URL}?action=remove`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Sau khi xóa thành công, tải lại giỏ hàng
+                        fetchCart();
+                    } else {
+                        alert('Lỗi khi xóa: ' + (data.message || 'Lỗi không xác định'));
+                    }
+                })
+                .catch(error => {
+                    alert('Lỗi kết nối Server khi xóa sản phẩm.');
+                });
+        }
+
+        function updateQuantity(productId, quantity) {
+            quantity = parseInt(quantity);
+            if (quantity < 1 || isNaN(quantity)) {
+                alert('Số lượng không hợp lệ.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('product_id', productId);
+            formData.append('quantity', quantity);
+
+            fetch(`${CART_API_URL}?action=update`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Sau khi cập nhật thành công, tải lại giỏ hàng
+                        fetchCart();
+                    } else {
+                        alert('Lỗi khi cập nhật: ' + (data.message || 'Lỗi không xác định'));
+                    }
+                })
+                .catch(error => {
+                    alert('Lỗi kết nối Server khi cập nhật số lượng.');
+                });
+        }
+
+
+        // ===================================================================
+        // KHỞI TẠO
+        // ===================================================================
+
+        window.addEventListener('DOMContentLoaded', fetchCart);
+    </script>
+</body>
+
 </html>
